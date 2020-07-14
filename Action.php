@@ -23,8 +23,10 @@ class RedirectableAttachmentLink_Action extends Typecho_Widget implements Widget
 	public function access()
 	{
         $options = Typecho_Widget::widget('Widget_Options');
+
+        $pluginOpt = $options->plugin('RedirectableAttachmentLink');
         
-        $domain = $options->plugin('RedirectableAttachmentLink')->domain;
+        $domain = $pluginOpt->domain;
 
         if (!isset($this->request->acid))
         {
@@ -43,9 +45,16 @@ class RedirectableAttachmentLink_Action extends Typecho_Widget implements Widget
         }
 
         $attach_text = unserialize($attach['text']);
-        $attach_url = Typecho_Common::url($attach_text['path'], ($domain ? $domain : $options->index)) . $options->plugin('RedirectableAttachmentLink')->imgstyle;
+
+        $isImage = in_array(strrchr($attach_text['name'], '.'), explode(" ", $pluginOpt->imagesuffixs));
+
+        $attach_url = Typecho_Common::url($attach_text['path'], ($domain ? $domain : $options->index)) . ($isImage? $pluginOpt->imgstyle : "");
 
         $this->response->redirect($attach_url);
+
+        // $a = ["a" => $isImage, "name" => $attach_text['name'], "q" => strrchr($attach_text['name'], '.')];
+
+        // $this->response->throwJSON($a);
 	}
 
 }
